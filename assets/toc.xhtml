@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+   <head>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+   </head>
+   <body>
+<section class="base" id="toc">
+    <nav epub:type="toc" >
+        <ol>
+            {{range $chapter := .Chapters}}
+            <li><a href="index.html#{{$chapter.Key}}">{{$chapter.Title}}</a>
+            {{if $chapter.Sub}}<ol>
+                {{range $sub := $chapter.Sub}}<li><a href="index.html#{{$sub.Key}}">{{$sub.Title}}</a></li>
+                {{end}}</ol>{{end}}
+            </li>
+            {{end}}
+        </ol>
+    </nav>
+</section>
+</body>
+</html>

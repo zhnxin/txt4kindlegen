@@ -1,0 +1,9 @@
+
+title="example"
+author="unknow"
+file="source.txt"
+cover="over_example.jpg"
+chapter='^第[零一二三四五六七八九十百千两\d]+章.*$'
+#chapter='^第[零一二三四五六七八九十百千两\d]+卷.*$'
+#subchapter='^第[零一二三四五六七八九十百千两\d]+章.*$'
+encoding="GB18030"

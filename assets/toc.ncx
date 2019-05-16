@@ -1,0 +1,18 @@
+<navMap>
+    {{range $chap := .Chapters}}
+    <navPoint class="h1" id="{{$chap.Key}}" playOrder="{{$chap.Order}}">
+        <navLabel>
+            <text>{{$chap.Title}}</text>
+        </navLabel>
+        <content src="index.html#{{$chap.Key}}" />
+        {{range $sub := $chap.Sub}}
+            <navPoint class="h2" id="{{$sub.Key}}"  playOrder="{{$sub.Order}}">
+                <navLabel>
+                    <text>{{$sub.Title}}</text>
+                </navLabel>
+                <content src="index.html#{{$sub.Key}}" />
+            </navPoint>
+        {{end}}
+    </navPoint>
+    {{end}}
+</navMap>

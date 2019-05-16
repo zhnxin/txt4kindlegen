@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package unique-identifier="uid">
+        <metadata>
+                <dc-metadata xmlns:dc="http://purl.org/metadata/dublin_core" xmlns:oebpackage="http://openebook.org/namespaces/oeb-package/1.0/">
+                        <dc:Title>{{.Title}}</dc:Title>
+                        <dc:Language>zh</dc:Language>
+                        <dc:Creator>{{.Author}}</dc:Creator>
+                </dc-metadata>
+                <x-metadata>
+                        <output encoding="utf-8"></output>
+                        <EmbeddedCover>{{.Cover}}</EmbeddedCover>
+                </x-metadata>
+        </metadata>
+        <manifest>
+                <item id="ncx" media-type="application/x-dtbncx+xml" href="toc.ncx"/>
+                <item id="cimage" media-type="image/jpeg" href="{{.Cover}}" properties="cover-image"/>
+                <item id="toc" properties="nav" href="toc.xhtml" media-type="application/xhtml+xml"/>
+                <item id="content" href="index.html" media-type="application/xhtml+xml"/>
+        </manifest>
+        <spine toc="ncx">
+                <itemref idref="cimage"/>
+                <itemref idref="toc"/>
+        </spine>
+        <tours></tours>
+        <guide>
+            <reference type="toc" title="目录" href="toc.xhtml"/>
+            <reference type="text" title="{{.Title}}" href="index.html"/>
+        </guide>
+</package>
