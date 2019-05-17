@@ -21,7 +21,8 @@ import (
 
 var (
 	ConfigFile = kingpin.Flag("config", "config file").Default("config.toml").Short('c').String()
-	isInit     = kingpin.Flag("init", "make a config file").Bool()
+	isInit     = kingpin.Flag("init", "make a config file").Short('i').Bool()
+	isNotDelete = kingpin.Flag("delete","is not to delete the temp file").Short('d').Bool()
 	bookTemp   *template.Template
 	ncxTemp    *textTemplate.Template
 	opfTemp    *textTemplate.Template
@@ -30,12 +31,7 @@ var (
 )
 
 func kindlegenCmd() error {
-	var cmd string
-	if runtime.GOOS == "windows" {
-		cmd = "kindlegen.exe"
-	} else {
-		cmd = "kindlegen"
-	}
+	var cmd string = "kindlegen"
 	if _, err := os.Stat(cmd); !os.IsNotExist(err) {
 		cmd = "./" + cmd
 	}
@@ -180,14 +176,20 @@ func main() {
 		}
 		toc.Close()
 	}
-	defer func() {
-		os.Remove("book.opf")
-		os.Remove("index.html")
-		os.Remove("toc.xhtml")
-		os.Remove("toc.ncx")
-	}()
-	if err = kindlegenCmd(); err != nil {
-		log.Fatal(err)
+
+	if runtime.GOOS != "windows"{
+
+		if err = kindlegenCmd(); err != nil {
+			log.Fatal(err)
+		}
+		if err = os.Rename("book.mobi", CONFIG.Title+".mobi");err!=nil{
+			log.Fatal(err)
+		}
+		if !*isNotDelete{
+			os.Remove("book.opf")
+			os.Remove("index.html")
+			os.Remove("toc.xhtml")
+			os.Remove("toc.ncx")
+		}
 	}
-	os.Rename("book.mobi", CONFIG.Title+".mobi")
 }

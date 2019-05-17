@@ -61,9 +61,9 @@ func (c *chapterContent) GetInfo() *chapterInfo {
 func (c *chapterContent) ToHtml() []byte {
 	body := []byte{}
 	if c.isNotSub {
-		body = append(body, []byte(fmt.Sprintf("<a name=\"%s\"/><h1 id=\"%s\">%s</h1>\n", c.Key, c.Key, c.Title))...)
+		body = append(body, []byte(fmt.Sprintf("<a name=\"%s\"/><h2 class=\"chapter\" id=\"%s\">%s</h2>\n", c.Key, c.Key, c.Title))...)
 	} else {
-		body = append(body, []byte(fmt.Sprintf("<a name=\"%s\"/><h2 id=\"%s\">%s</h2>\n", c.Key, c.Key, c.Title))...)
+		body = append(body, []byte(fmt.Sprintf("<a name=\"%s\"/><h3 class=\"subchapter\" id=\"%s\">%s</h3>\n", c.Key, c.Key, c.Title))...)
 	}
 
 	for _, l := range c.Content {
