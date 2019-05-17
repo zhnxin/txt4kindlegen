@@ -37,7 +37,7 @@ func kindlegenCmd() error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	c := exec.CommandContext(ctx, cmd, "book.opf")
+	c := exec.CommandContext(ctx, cmd, CONFIG.Title+".opf")
 	c.Stderr = os.Stderr
 	c.Stdout = os.Stdout
 	return c.Run()
@@ -103,7 +103,7 @@ func main() {
 	if err = bookTemp.Execute(output, CONFIG); err != nil {
 		log.Fatal(err)
 	}
-	if opf, err := os.OpenFile("book.opf", os.O_CREATE|os.O_WRONLY, 0755); err != nil {
+	if opf, err := os.OpenFile(CONFIG.Title+".opf", os.O_CREATE|os.O_WRONLY, 0755); err != nil {
 		log.Fatal(err)
 	} else {
 		defer opf.Close()
@@ -176,17 +176,12 @@ func main() {
 		}
 		toc.Close()
 	}
-
 	if runtime.GOOS != "windows"{
-
 		if err = kindlegenCmd(); err != nil {
 			log.Fatal(err)
 		}
-		if err = os.Rename("book.mobi", CONFIG.Title+".mobi");err!=nil{
-			log.Fatal(err)
-		}
 		if !*isNotDelete{
-			os.Remove("book.opf")
+			os.Remove(CONFIG.Title+".opf")
 			os.Remove("index.html")
 			os.Remove("toc.xhtml")
 			os.Remove("toc.ncx")
