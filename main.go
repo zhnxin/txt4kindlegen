@@ -12,32 +12,43 @@ import (
 	textTemplate "text/template"
 	"time"
 
-	"github.com/BurntSushi/toml"
-
 	"./assets"
 	"./utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	ConfigFile = kingpin.Flag("config", "config file").Default("config.toml").Short('c').String()
-	isInit     = kingpin.Flag("init", "make a config file").Short('i').Bool()
-	isNotDelete = kingpin.Flag("delete","is not to delete the temp file").Short('d').Bool()
-	bookTemp   *template.Template
-	ncxTemp    *textTemplate.Template
-	opfTemp    *textTemplate.Template
-	tocTemp    *textTemplate.Template
-	CONFIG     = &utils.Config{}
+	ConfigFile  = kingpin.Flag("config", "config file").Default("config.toml").Short('c').String()
+	isInit      = kingpin.Flag("init", "make a config file").Short('i').Bool()
+	isNotDelete = kingpin.Flag("delete", "is not to delete the temp file").Short('d').Bool()
+	bookTemp    *template.Template
+	ncxTemp     *textTemplate.Template
+	opfTemp     *textTemplate.Template
+	tocTemp     *textTemplate.Template
+	CONFIG      = &utils.Config{}
 )
 
-func kindlegenCmd() error {
+func kindlegenSh() error {
 	var cmd string = "kindlegen"
 	if _, err := os.Stat(cmd); !os.IsNotExist(err) {
 		cmd = "./" + cmd
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
-	c := exec.CommandContext(ctx, cmd, CONFIG.Title+".opf")
+	c := exec.CommandContext(ctx, cmd, "-dont_append_source", "-c1", "-o", CONFIG.Title+".mobi", "book.opf")
+	c.Stderr = os.Stderr
+	c.Stdout = os.Stdout
+	return c.Run()
+}
+
+func kinlegenCmd() error {
+	var cmd string = "kindlegen.exe"
+	if _, err := os.Stat(cmd); !os.IsNotExist(err) {
+		cmd = "./" + cmd
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	defer cancel()
+	c := exec.CommandContext(ctx, cmd, "-dont_append_source", "-c1", "-o", CONFIG.Title+".mobi", "book.opf")
 	c.Stderr = os.Stderr
 	c.Stdout = os.Stdout
 	return c.Run()
@@ -74,7 +85,7 @@ type ChapterTitles struct {
 func main() {
 	kingpin.Parse()
 	if *isInit {
-		conf, err := os.OpenFile("config_example.toml", os.O_WRONLY|os.O_CREATE, 0755)
+		conf, err := os.OpenFile("config_example.toml", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -88,14 +99,16 @@ func main() {
 		}
 		return
 	}
-	_, err := toml.DecodeFile(*ConfigFile, CONFIG)
+	var err error
+	CONFIG, err = utils.NewConfigWithFile(*ConfigFile)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println(CONFIG.Lang)
 	if err = CONFIG.Check(); err != nil {
 		log.Fatal(err)
 	}
-	output, err := os.OpenFile("index.html", os.O_WRONLY|os.O_CREATE, 0755)
+	output, err := os.OpenFile("index.html", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,13 +116,14 @@ func main() {
 	if err = bookTemp.Execute(output, CONFIG); err != nil {
 		log.Fatal(err)
 	}
-	if opf, err := os.OpenFile(CONFIG.Title+".opf", os.O_CREATE|os.O_WRONLY, 0755); err != nil {
+	if opf, err := os.OpenFile("book.opf", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755); err != nil {
 		log.Fatal(err)
 	} else {
-		defer opf.Close()
 		if err = opfTemp.Execute(opf, CONFIG); err != nil {
+			opf.Close()
 			log.Fatal(err)
 		}
+		opf.Close()
 	}
 	file, err := os.Open(CONFIG.File)
 	if err != nil {
@@ -154,11 +168,12 @@ func main() {
 	if err = scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+	file.Close()
 	if _, err = fmt.Fprintln(output, "\n</body>\n</html>"); err != nil {
 		log.Fatal(err)
 	}
 	output.Close()
-	if toc, err := os.OpenFile("toc.ncx", os.O_CREATE|os.O_WRONLY, 0755); err != nil {
+	if toc, err := os.OpenFile("toc.ncx", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755); err != nil {
 		log.Fatal(err)
 	} else {
 		if err = ncxTemp.Execute(toc, chapinfo); err != nil {
@@ -167,7 +182,7 @@ func main() {
 		}
 		toc.Close()
 	}
-	if toc, err := os.OpenFile("toc.xhtml", os.O_CREATE|os.O_WRONLY, 0755); err != nil {
+	if toc, err := os.OpenFile("toc.xhtml", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755); err != nil {
 		log.Fatal(err)
 	} else {
 		if err = tocTemp.Execute(toc, chapinfo); err != nil {
@@ -176,15 +191,19 @@ func main() {
 		}
 		toc.Close()
 	}
-	if runtime.GOOS != "windows"{
-		if err = kindlegenCmd(); err != nil {
+	if runtime.GOOS != "windows" {
+		if err = kindlegenSh(); err != nil {
 			log.Fatal(err)
 		}
-		if !*isNotDelete{
-			os.Remove(CONFIG.Title+".opf")
-			os.Remove("index.html")
-			os.Remove("toc.xhtml")
-			os.Remove("toc.ncx")
+	} else {
+		if err = kinlegenCmd(); err != nil {
+			log.Fatal(err)
 		}
+	}
+	if !*isNotDelete {
+		os.Remove("book.opf")
+		os.Remove("index.html")
+		os.Remove("toc.xhtml")
+		os.Remove("toc.ncx")
 	}
 }

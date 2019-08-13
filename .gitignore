@@ -2,3 +2,4 @@ assets/asset.go
 config.toml
 *.mobi
 *.epub
+txt4kindlegen*

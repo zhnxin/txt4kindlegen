@@ -14,6 +14,7 @@ Run the build cmd:
 go-bindata -o assets/asset.go -pkg=assets assets/...
 go build
 ```
+_gos cross main.go windows amd64_
 
 ## Usage
 ```

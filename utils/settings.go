@@ -25,9 +25,10 @@ type Config struct {
 	SubChapter      string
 	Encoding        string
 	File            string
+	Lang            string
+	Compress        bool
 	ChapterRegex    *regexp.Regexp
 	SubChapterRegex *regexp.Regexp
-	Compress        bool
 	decode          *encoding.Decoder
 }
 
@@ -83,7 +84,7 @@ func (config *Config) Check() (err error) {
 }
 
 func NewConfigWithFile(configFile string) (config *Config, err error) {
-	config = &Config{}
+	config = &Config{Lang: "en"}
 	_, err = toml.DecodeFile(configFile, &config)
 	if err != nil {
 		return
