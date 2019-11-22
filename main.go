@@ -12,8 +12,8 @@ import (
 	textTemplate "text/template"
 	"time"
 
-	"./assets"
-	"./utils"
+	"github.com/zhnxin/txt4kindlegen/assets"
+	"github.com/zhnxin/txt4kindlegen/utils"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
