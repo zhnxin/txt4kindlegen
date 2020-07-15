@@ -21,6 +21,7 @@ var (
 	ConfigFile  = kingpin.Flag("config", "config file").Default("config.toml").Short('c').String()
 	isInit      = kingpin.Flag("init", "make a config file").Short('i').Bool()
 	isNotDelete = kingpin.Flag("delete", "is not to delete the temp file").Short('d').Bool()
+	isClean     = kingpin.Flag("clean", "to clean template file").Bool()
 	bookTemp    *template.Template
 	ncxTemp     *textTemplate.Template
 	opfTemp     *textTemplate.Template
@@ -97,6 +98,13 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		return
+	}
+	if *isClean {
+		os.Remove("book.opf")
+		os.Remove("index.html")
+		os.Remove("toc.xhtml")
+		os.Remove("toc.ncx")
 		return
 	}
 	var err error
